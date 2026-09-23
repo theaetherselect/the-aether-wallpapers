@@ -1,17 +1,17 @@
 /* ============================================
-   AETHER FILTER v2.0 — Best Quality
-   Fast + Smooth + Category Exclusive
+   AETHER FILTER v3.0 — Wait Version
+   Chahe kitni der lage, chalega
    ============================================ */
 
 (function() {
 'use strict';
 
-console.log('FILTER: Started');
+console.log('FILTER: Script loaded');
 
 /* ============================================
    11 CATEGORIES
    ============================================ */
-var AETHER_CATS = [
+var NEW_CATS = [
   {id:'featured', n:'Featured', i:'featured', q:'beautiful stunning wallpaper aesthetic'},
   {id:'amoled', n:'AMOLED', i:'dark', q:'amoled black dark wallpaper'},
   {id:'countries', n:'Countries', i:'nature', q:'norway switzerland iceland nature wallpaper'},
@@ -28,36 +28,25 @@ var AETHER_CATS = [
 /* ============================================
    BAD WORDS
    ============================================ */
-var humanWords = [
+var BAD = [
   'person','people','man','woman','girl','boy','child',
   'face','portrait','human','model','baby','family',
   'wedding','selfie','group','crowd','skin','hand',
   'leg','body','tattoo','couple','kiss','arm','eye',
-  'smile','hair','dress','sitting','standing','walking'
-];
-
-var stockWords = [
+  'smile','hair','dress','sitting','standing','walking',
   'business','office','meeting','team','corporate',
   'laptop','desk','work','professional','employee',
   'stock','commercial','suit','tie','handshake'
 ];
 
-var humanSet = {};
-var stockSet = {};
-humanWords.forEach(function(w){ humanSet[w] = 1; });
-stockWords.forEach(function(w){ stockSet[w] = 1; });
+var BAD_SET = {};
+BAD.forEach(function(w) { BAD_SET[w] = 1; });
 
-/* ============================================
-   FAST CHECK
-   ============================================ */
 function isBad(alt) {
   if (!alt) return false;
-  alt = alt.toLowerCase();
-  var words = alt.split(/[^a-z]+/);
+  var words = alt.toLowerCase().split(/[^a-z]+/);
   for (var i = 0; i < words.length; i++) {
-    if (words[i] && (humanSet[words[i]] || stockSet[words[i]])) {
-      return true;
-    }
+    if (words[i] && BAD_SET[words[i]]) return true;
   }
   return false;
 }
@@ -72,92 +61,73 @@ function getResTag(w, h) {
 }
 
 /* ============================================
-   APPLY FILTER
+   APPLY
    ============================================ */
+var APPLIED = false;
+
 function applyFilter() {
+  if (APPLIED) return;
+  if (!window.A || !window.A.renderGrid) return;
 
-  console.log('FILTER: App found');
+  APPLIED = true;
+  console.log('FILTER: Applying...');
 
-  /* Override categories */
+  /* Categories */
   if (window.CATS && Array.isArray(window.CATS)) {
     window.CATS.length = 0;
-    for (var i = 0; i < AETHER_CATS.length; i++) {
-      window.CATS.push(AETHER_CATS[i]);
-    }
-    console.log('FILTER: ' + AETHER_CATS.length + ' categories set');
+    NEW_CATS.forEach(function(c) { window.CATS.push(c); });
+    console.log('FILTER: ' + NEW_CATS.length + ' categories');
   }
 
   /* Override renderGrid */
-  var originalRenderGrid = window.A.renderGrid;
+  var origRender = window.A.renderGrid;
+  window.A.renderGrid = function(list) {
+    var filtered = [];
+    for (var i = 0; i < list.length; i++) {
+      var w = list[i];
+      var alt = w.alt || '';
+      if (isBad(alt)) continue;
 
-  if (originalRenderGrid) {
+      var catName = w.tag ? w.tag.split(' · ')[0] : 'Wallpaper';
+      var resTag = getResTag(w.w, w.h);
+      w.tag = resTag ? (catName + ' · ' + resTag) : catName;
 
-    window.A.renderGrid = function(list) {
-
-      var filtered = [];
-      var len = list.length;
-
-      for (var i = 0; i < len; i++) {
-
-        var w = list[i];
-        var alt = (w.alt || '');
-
-        /* Skip bad words */
-        if (isBad(alt)) continue;
-
-        /* Update tag */
-        var parts = w.tag ? w.tag.split(' · ') : ['Wallpaper'];
-        var catName = parts[0] || 'Wallpaper';
-        var resTag = getResTag(w.w, w.h);
-        w.tag = resTag ? (catName + ' · ' + resTag) : catName;
-
-        filtered.push(w);
-      }
-
-      console.log('FILTER: ' + filtered.length + '/' + len + ' wallpapers');
-
-      return originalRenderGrid.call(window.A, filtered);
-    };
-
-    console.log('FILTER: renderGrid ready');
-  }
-
-  /* Override renderCats to use new categories */
-  var originalRenderCats = window.A.renderCats;
-  if (originalRenderCats) {
-    window.A.renderCats = function() {
-      var c = document.getElementById('categories');
-      if (!c) return;
-
-      var html = '';
-      for (var i = 0; i < AETHER_CATS.length; i++) {
-        var x = AETHER_CATS[i];
-        html += '<button class="cc" data-cat="' + x.id + '" onclick="A.setCat(\'' + x.id + '\')">';
-        html += '<span>' + x.n + '</span>';
-        html += '</button>';
-      }
-      c.innerHTML = html;
-      console.log('FILTER: categories rendered');
-    };
-  }
+      filtered.push(w);
+    }
+    console.log('FILTER: ' + filtered.length + '/' + list.length);
+    return origRender.call(window.A, filtered);
+  };
 
   console.log('%c AETHER FILTER ACTIVE', 'color:#7c3aed;font-weight:900;font-size:16px;');
 }
 
 /* ============================================
-   WAIT FOR APP
+   SMART WAIT — Chahe kitni der lage
    ============================================ */
-var tries = 0;
-var timer = setInterval(function() {
-  tries++;
+var attempts = 0;
+var maxAttempts = 300; /* 30 seconds */
 
-  if (window.A && window.A.renderGrid && window.A.renderCats) {
+var timer = setInterval(function() {
+  attempts++;
+  applyFilter();
+
+  if (APPLIED || attempts >= maxAttempts) {
     clearInterval(timer);
-    applyFilter();
-  } else if (tries > 100) {
-    clearInterval(timer);
-    console.warn('FILTER: App not found after 10s');
   }
 }, 100);
+
+/* Also check on DOM ready */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(applyFilter, 500);
+  });
+} else {
+  setTimeout(applyFilter, 500);
+}
+
+/* Also check on window load */
+window.addEventListener('load', function() {
+  setTimeout(applyFilter, 1000);
+});
 
 })();
