@@ -1,24 +1,54 @@
 /* ============================================
    THE AETHER WALLPAPERS — Ads Loader
-   FINAL — TOP + MIDDLE + BOTTOM + POPUNDER + SOCIAL BAR
+   FINAL — Top + Middle + Bottom + Popunder + Social Bar
+   Popunder — Limited (har 10 clicks ke baad)
    ============================================ */
 
 (function() {
 'use strict';
 
 /* ============================================
-   1. POPUNDER — Background (auto, no UI)
+   1. POPUNDER — Limited Trigger
+   Har 10 clicks ke baad hi chalega
    ============================================ */
-(function() {
-var s = document.createElement('script');
-s.src = 'https://pl31472208.profitableratecpmnetwork.com/ca/47/c7/ca47c76f9beea26720e6209174e0a947.js';
-s.async = true;
-s.setAttribute('data-cfasync', 'false');
-document.head.appendChild(s);
-})();
+var clickCount = 0;
+var CLICKS_NEEDED = 10;
+var popunderLoaded = false;
+
+/* Popunder ka code — function mein */
+function loadPopunder() {
+  if (popunderLoaded) return;
+  popunderLoaded = true;
+  
+  var s = document.createElement('script');
+  s.src = 'https://pl31472208.profitableratecpmnetwork.com/ca/47/c7/ca47c76f9beea26720e6209174e0a947.js';
+  s.async = true;
+  s.setAttribute('data-cfasync', 'false');
+  document.head.appendChild(s);
+  
+  console.log('POPUNDER: Loaded after ' + CLICKS_NEEDED + ' clicks');
+}
+
+/* Click counter */
+document.addEventListener('click', function() {
+  clickCount++;
+  
+  if (clickCount === CLICKS_NEEDED && !popunderLoaded) {
+    loadPopunder();
+  }
+}, { passive: true });
+
+/* Touch counter — mobile ke liye */
+document.addEventListener('touchstart', function() {
+  clickCount++;
+  
+  if (clickCount === CLICKS_NEEDED && !popunderLoaded) {
+    loadPopunder();
+  }
+}, { passive: true });
 
 /* ============================================
-   2. SOCIAL BAR — Floating (auto, no UI)
+   2. SOCIAL BAR — Floating (auto)
    ============================================ */
 (function() {
 var s = document.createElement('script');
@@ -46,7 +76,7 @@ var AD_BOTTOM = '<script type="text/javascript">atOptions={"key":"00d77ef15a41ab
    ============================================ */
 function injectAds() {
 
-/* TOP AD — categories ke neeche */
+/* TOP AD */
 var top = document.getElementById('ad-top');
 if (top) {
 top.innerHTML = AD_TOP;
@@ -54,7 +84,7 @@ top.classList.add('has-code');
 top.style.display = 'flex';
 }
 
-/* BOTTOM AD — footer se upar */
+/* BOTTOM AD */
 var bot = document.getElementById('ad-bottom');
 if (bot) {
 bot.innerHTML = AD_BOTTOM;
@@ -62,7 +92,7 @@ bot.classList.add('has-code');
 bot.style.display = 'flex';
 }
 
-/* Body classes — ads ON */
+/* Body classes */
 document.body.classList.add('ads-on', 'has-ad-code');
 
 }
