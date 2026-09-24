@@ -2,8 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
 <loc>https://the-aether-wallpapers.pages.dev/</loc>
-<lastmod>2026-01-01</lastmod>
+<lastmod>2026-01-15</lastmod>
 <changefreq>daily</changefreq>
 <priority>1.0</priority>
+</url>
+<url>
+<loc>https://the-aether-wallpapers.pages.dev/faq.html</loc>
+<lastmod>2026-01-15</lastmod>
+<changefreq>weekly</changefreq>
+<priority>0.8</priority>
 </url>
 </urlset>
